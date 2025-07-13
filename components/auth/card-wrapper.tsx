@@ -16,7 +16,7 @@ interface CardWrapperProps {
   footerLabel?: string
 }
 
-export default function CardWrapper({
+export function CardWrapper({
   children,
   headerLabel,
   footerLabel

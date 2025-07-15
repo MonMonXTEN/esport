@@ -1,3 +1,4 @@
+import StaffPage from "@/components/staff/query-data";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,6 +7,8 @@ export const metadata: Metadata = {
 
 export default function Staff() {
   return (
-    <div>Staff</div>
+    <div>
+      <StaffPage />
+    </div>
   )
 }

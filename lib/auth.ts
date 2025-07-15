@@ -2,11 +2,9 @@ import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { signInSchema } from "@/lib/zod"
 import bcrypt from "bcryptjs"
-import { PrismaClient } from "@/lib/generated/prisma"
+import db from "@/lib/db"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { z } from "zod"
-
-const prisma = new PrismaClient()
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
@@ -21,7 +19,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
           const { username, password } = await signInSchema.parseAsync(credentials)
 
-          const user = await prisma.user.findUnique({
+          const user = await db.user.findUnique({
             where: { username: username }
           })
 
@@ -50,7 +48,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(db),
   session: {
     strategy: "jwt",
   },

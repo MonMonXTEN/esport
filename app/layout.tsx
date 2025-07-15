@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_Thai } from 'next/font/google';
 import "./globals.css";
 
+import ReactQueryProvider from "@/components/providers/react-query-provider";
 import { SessionProvider } from "next-auth/react";
 
 const font = Noto_Sans_Thai({
@@ -31,7 +32,9 @@ export default async function RootLayout({
         className={`${font.className} antialiased`}
       >
         <SessionProvider>
-          {children}
+          <ReactQueryProvider>
+            {children}
+          </ReactQueryProvider>
         </SessionProvider>
       </body>
     </html>

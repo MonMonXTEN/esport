@@ -8,7 +8,6 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import StaffTable, { Staff } from "@/components/staff/staff-table";
-import { Separator } from "@/components/ui/separator";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +36,7 @@ export default function StaffPage() {
         order: sort.order,
       });
       const res = await fetch(`/api/admin/getstaff?${params.toString()}`);
-      if (!res.ok) throw new Error("Failed to fetch staff");
+      if (!res.ok) throw new Error("Failed to fetch");
       return res.json();
     },
     placeholderData: keepPreviousData,
@@ -45,10 +44,7 @@ export default function StaffPage() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <section className="space-y-4">
-        <h1 className="text-2xl font-semibold">Staff</h1>
-        <Separator />
-
+      <section>
         <StaffTable
           data={data?.rows ?? []}
           page={page}

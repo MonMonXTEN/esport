@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -148,17 +148,12 @@ export default function StaffTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [search, setSearch] = useState("")
-  const [tableData, setTableData] = useState<Staff[]>(data)
 
   /* modal state */
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
-
-  useEffect(() => {
-    setTableData(data)
-  }, [data])
 
   const onSort = (s: { by: string; order: "asc" | "desc" }) => {
     setCurrentSort(s)
@@ -312,7 +307,7 @@ export default function StaffTable({
   };
 
   const table = useReactTable({
-    data: tableData,
+    data,
     columns,
     manualPagination: true,
     pageCount: Math.ceil(total / pageSize),
@@ -342,9 +337,7 @@ export default function StaffTable({
         body: JSON.stringify({ ids }),
       });
       if (!res.ok) throw new Error('ไม่สามารถลบได้')
-      // window.location.reload();
-      setTableData((prev: Staff[]) => prev.filter(staff => !ids.includes(staff.id)))
-      toast.success(`ลบ ${selectedCount} รายการ `)
+      window.location.reload();
       setConfirmOpen(false);
       table.resetRowSelection();
     } catch {

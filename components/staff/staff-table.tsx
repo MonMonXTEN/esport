@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -44,8 +43,13 @@ export interface Staff {
 };
 
 interface StaffTableProps {
-  /** page size for fetching data */
-  pageSize?: number
+  data: Staff[]
+  page: number
+  pageSize: number
+  total: number
+  isLoading: boolean
+  onPageChange: (page: number) => void
+  onSortChange: (sort: { by: string; order: "asc" | "desc" }) => void
 }
 
 /* Dialog ConfirmDelete */
@@ -123,13 +127,20 @@ function EditStaffDialog({
 }
 
 /* Main Table */
-export default function StaffTable({ pageSize = 10 }: StaffTableProps) {
-  const [page, setPage] = useState(1)
+export default function StaffTable({
+  data,
+  page,
+  pageSize,
+  total,
+  isLoading,
+  onPageChange,
+  onSortChange
+}: StaffTableProps) {
+  /* ------- local UI state ------- */
   const [currentSort, setCurrentSort] = useState<{
       by: string;
       order: "asc" | "desc"
     }>({ by: "name", order: "asc" })
-  /* ------- local UI state ------- */
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -144,34 +155,9 @@ export default function StaffTable({ pageSize = 10 }: StaffTableProps) {
   const [deleteLoading, setDeleteLoading] = useState(false)
 
   const onSort = (s: { by: string; order: "asc" | "desc" }) => {
-    setPage(1)
     setCurrentSort(s)
+    onSortChange(s)
   };
-
-  const { data, isFetching, refetch } = useQuery({
-    queryKey: ["staff", page, pageSize, currentSort],
-    queryFn: async (): Promise<{
-      rows: Staff[];
-      total: number;
-      page: number;
-      pageSize: number;
-    }> => {
-      const params = new URLSearchParams({
-        page: String(page),
-        size: String(pageSize),
-        sortBy: currentSort.by,
-        order: currentSort.order,
-      });
-      const res = await fetch(`/api/admin/getstaff?${params.toString()}`);
-      if (!res.ok) throw new Error("Failed to fetch");
-      return res.json();
-    },
-    placeholderData: keepPreviousData,
-    refetchInterval: 3000,
-  });
-
-  const total = data?.total ?? 0
-  const isLoading = isFetching
 
   const columns: ColumnDef<Staff>[] = [
     {
@@ -320,10 +306,10 @@ export default function StaffTable({ pageSize = 10 }: StaffTableProps) {
 };
 
   const table = useReactTable({
-    data: data?.rows ?? [],
+    data,
     columns,
     manualPagination: true,
-    pageCount: Math.ceil((data?.total ?? 0) / pageSize),
+    pageCount: Math.ceil( total / pageSize),
     globalFilterFn: fuzzyFilter,
     state: { sorting, columnFilters, columnVisibility, rowSelection },
     onSortingChange: setSorting,
@@ -350,7 +336,7 @@ export default function StaffTable({ pageSize = 10 }: StaffTableProps) {
       body: JSON.stringify({ ids }),
     });
     if (!res.ok) throw new Error('Delete failed');
-    refetch();
+    window.location.reload();
     } catch {
       alert('เกิดข้อผิดพลาดขณะลบ');
     } finally {
@@ -374,7 +360,7 @@ export default function StaffTable({ pageSize = 10 }: StaffTableProps) {
       body: JSON.stringify({ ids: [editingStaff.id] }),
     });
     if (!res.ok) throw new Error('Delete failed');
-    refetch(); // refresh data
+    window.location.reload(); // หรือ fetch ใหม่
     } catch {
       alert('เกิดข้อผิดพลาดขณะลบ');
     } finally {
@@ -494,7 +480,7 @@ export default function StaffTable({ pageSize = 10 }: StaffTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage(page - 1)}
+            onClick={() => onPageChange(page - 1)}
             disabled={page === 1 || isLoading}
           >
             Prev
@@ -502,7 +488,7 @@ export default function StaffTable({ pageSize = 10 }: StaffTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage(page + 1)}
+            onClick={() => onPageChange(page + 1)}
             disabled={page * pageSize >= total || isLoading}
           >
             Next

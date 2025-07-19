@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -34,6 +34,7 @@ import { ArrowUpDown, MoreHorizontal, Trash2, Pencil, Loader2 } from "lucide-rea
 import { cn } from "@/lib/utils";
 import AddButton from "./add-button";
 import DeleteButton from "./delete-button";
+import { toast } from "sonner"
 
 export interface Staff {
   id: string
@@ -138,21 +139,26 @@ export default function StaffTable({
 }: StaffTableProps) {
   /* ------- local UI state ------- */
   const [currentSort, setCurrentSort] = useState<{
-      by: string;
-      order: "asc" | "desc"
-    }>({ by: "name", order: "asc" })
+    by: string;
+    order: "asc" | "desc"
+  }>({ by: "name", order: "asc" })
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [search, setSearch] = useState("")
+  const [tableData, setTableData] = useState<Staff[]>(data)
 
   /* modal state */
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+
+  useEffect(() => {
+    setTableData(data)
+  }, [data])
 
   const onSort = (s: { by: string; order: "asc" | "desc" }) => {
     setCurrentSort(s)
@@ -182,63 +188,63 @@ export default function StaffTable({
     },
     { accessorKey: "id", header: "ID", size: 90 },
     {
-        accessorKey: "name",
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            className="flex items-center gap-1"
-            onClick={() =>
-              onSort({
-                by: "name",
-                order:
-                  currentSort.by === "name" && currentSort.order === "asc"
-                    ? "desc"
-                    : "asc",
-              })
-            }
-          >
-            Name
-            <ArrowUpDown
-              className={cn(
-                "h-3 w-3 transition-transform",
-                currentSort.by === "name" &&
-                  currentSort.order === "desc" &&
-                  "rotate-180",
-              )}
-            />
-          </Button>
-        ),
-      },
-      {
-        accessorKey: "username",
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            className="flex items-center gap-1"
-            onClick={() =>
-              onSort({
-                by: "username",
-                order:
-                  currentSort.by === "username" && currentSort.order === "asc"
-                    ? "desc"
-                    : "asc",
-              })
-            }
-          >
-            Username
-            <ArrowUpDown
-              className={cn(
-                "h-3 w-3 transition-transform",
-                currentSort.by === "username" &&
-                  currentSort.order === "desc" &&
-                  "rotate-180",
-              )}
-            />
-          </Button>
-        ),
-      },
+      accessorKey: "name",
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="flex items-center gap-1"
+          onClick={() =>
+            onSort({
+              by: "name",
+              order:
+                currentSort.by === "name" && currentSort.order === "asc"
+                  ? "desc"
+                  : "asc",
+            })
+          }
+        >
+          Name
+          <ArrowUpDown
+            className={cn(
+              "h-3 w-3 transition-transform",
+              currentSort.by === "name" &&
+              currentSort.order === "desc" &&
+              "rotate-180",
+            )}
+          />
+        </Button>
+      ),
+    },
+    {
+      accessorKey: "username",
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="flex items-center gap-1"
+          onClick={() =>
+            onSort({
+              by: "username",
+              order:
+                currentSort.by === "username" && currentSort.order === "asc"
+                  ? "desc"
+                  : "asc",
+            })
+          }
+        >
+          Username
+          <ArrowUpDown
+            className={cn(
+              "h-3 w-3 transition-transform",
+              currentSort.by === "username" &&
+              currentSort.order === "desc" &&
+              "rotate-180",
+            )}
+          />
+        </Button>
+      ),
+    },
     // {
     //   accessorKey: "name",
     //   header: ({ column }) => (
@@ -300,16 +306,16 @@ export default function StaffTable({
 
   // Search Data
   const fuzzyFilter: FilterFn<Staff> = (row, columnId, value, addMeta) => {
-  const itemRank = rankItem(String(row.getValue(columnId)), value);
-  addMeta({ itemRank });
-  return itemRank.passed;
-};
+    const itemRank = rankItem(String(row.getValue(columnId)), value);
+    addMeta({ itemRank });
+    return itemRank.passed;
+  };
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     manualPagination: true,
-    pageCount: Math.ceil( total / pageSize),
+    pageCount: Math.ceil(total / pageSize),
     globalFilterFn: fuzzyFilter,
     state: { sorting, columnFilters, columnVisibility, rowSelection },
     onSortingChange: setSorting,
@@ -330,42 +336,40 @@ export default function StaffTable({
     const ids = selectedRows.map(r => r.original.id)
     setDeleteLoading(true)
     try {
-    const res = await fetch('/api/admin/deletestaff', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids }),
-    });
-    if (!res.ok) throw new Error('Delete failed');
-    window.location.reload();
-    } catch {
-      alert('เกิดข้อผิดพลาดขณะลบ');
-    } finally {
-      setDeleteLoading(false);
+      const res = await fetch('/api/admin/deletestaff', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok) throw new Error('ไม่สามารถลบได้')
+      // window.location.reload();
+      setTableData((prev: Staff[]) => prev.filter(staff => !ids.includes(staff.id)))
+      toast.success(`ลบ ${selectedCount} รายการ `)
       setConfirmOpen(false);
       table.resetRowSelection();
+    } catch {
+      toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่ในภายหลัง")
+    } finally {
+      setDeleteLoading(false);
     }
-
-    console.log("Delete selected rows: ", table.getSelectedRowModel().rows);
-    setConfirmOpen(false);
-    table.resetRowSelection();
   };
 
   const deleteSingle = async () => {
-  if (!editingStaff) return;
-  setDeleteLoading(true);
-  try {
-    const res = await fetch('/api/admin/deletestaff', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: [editingStaff.id] }),
-    });
-    if (!res.ok) throw new Error('Delete failed');
-    window.location.reload(); // หรือ fetch ใหม่
+    if (!editingStaff) return;
+    setDeleteLoading(true);
+    try {
+      const res = await fetch('/api/admin/deletestaff', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [editingStaff.id] }),
+      });
+      if (!res.ok) throw new Error('Delete failed')
+      window.location.reload()
     } catch {
       alert('เกิดข้อผิดพลาดขณะลบ');
     } finally {
-      setDeleteLoading(false);
-      setConfirmOpen(false);
+      setDeleteLoading(false)
+      setConfirmOpen(false)
     }
   };
 
@@ -438,28 +442,28 @@ export default function StaffTable({
             </TableHeader>
             <TableBody>
               {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center">
-                <Loader2 className="mx-auto h-4 w-4 animate-spin" />
-              </TableCell>
-            </TableRow>
-          ) : 
-              table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
+                  <TableCell colSpan={6} className="text-center">
+                    <Loader2 className="mx-auto h-4 w-4 animate-spin" />
                   </TableCell>
                 </TableRow>
-              )
-            }
+              ) :
+                table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )
+              }
             </TableBody>
           </Table>
         </div>

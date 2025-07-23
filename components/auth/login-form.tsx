@@ -120,8 +120,7 @@ export function LoginForm() {
             type="submit"
             className="w-full"
           >
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            เข้าสู่ระบบ
+            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "เข้าสู่ระบบ"}
           </Button>
         </form>
       </Form>

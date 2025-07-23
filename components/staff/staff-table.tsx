@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -27,14 +27,44 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-import { ArrowUpDown, MoreHorizontal, Trash2, Pencil, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  ArrowUpDown,
+  MoreHorizontal,
+  Trash2,
+  Pencil,
+  Loader2
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import AddButton from "./add-button";
 import DeleteButton from "./delete-button";
 import { toast } from "sonner"
+import { staffSchema } from "@/lib/zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import z from "zod";
 
 export interface Staff {
   id: string
@@ -93,35 +123,231 @@ function ConfirmDeleteDialog({
   );
 }
 
-function EditStaffDialog({
+function AddStaffDialog({
   open,
   onClose,
-  staff,
+  onCreated,
 }: {
   open: boolean;
   onClose: () => void;
-  staff: Staff | null;
+  onCreated: () => void;
 }) {
+  const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    reset,
+    watch,
+  } = useForm<z.infer<typeof staffSchema>>({
+    resolver: zodResolver(staffSchema),
+    defaultValues: { name: "", username: "", password: "", role: "staff" },
+  });
+
+  useEffect(() => {
+    if (!open) reset();
+  }, [open, reset]);
+
+  const onSubmit = async (data: any) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error();
+      onCreated();
+      onClose();
+    } catch {
+      toast.error("บันทึกไม่สำเร็จ ลองใหม่ภายหลัง");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>แก้ไขข้อมูล</DialogTitle>
+          <DialogTitle>เพิ่มกรรมการ</DialogTitle>
         </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Name */}
+          <div>
+            <Input
+              {...register("name")}
+              placeholder="ชื่อ"
+              disabled={loading}
+            />
+            {errors.name && (
+              <p className="text-destructive text-xs mt-1">{errors.name.message}</p>
+            )}
+          </div>
+          {/* Username */}
+          <div>
+            <Input
+              {...register("username")}
+              placeholder="Username"
+              disabled={loading}
+            />
+            {errors.username && (
+              <p className="text-destructive text-xs mt-1">{errors.username.message}</p>
+            )}
+          </div>
+          {/* Password */}
+          <div>
+            <Input
+              type="password"
+              {...register("password")}
+              placeholder="รหัสผ่าน"
+              disabled={loading}
+            />
+            {errors.password && (
+              <p className="text-destructive text-xs mt-1">{errors.password.message}</p>
+            )}
+          </div>
+          {/* Role */}
+          <div>
+            <Select
+              value={watch("role")}
+              onValueChange={v => setValue("role", v as "staff" | "admin", { shouldValidate: true })}
+              disabled={loading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="เลือก Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="staff">Staff</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.role && (
+              <p className="text-destructive text-xs mt-1">{errors.role.message}</p>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" type="button" onClick={onClose} disabled={loading}>
+              ยกเลิก
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              บันทึก
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-        {staff && (
-          <form className="space-y-4">
-            <Input defaultValue={staff.name} placeholder="Name" />
-            <Input defaultValue={staff.username} placeholder="Username" />
-            <Input defaultValue={staff.role} placeholder="Role" />
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" type="button" onClick={onClose}>
-                ยกเลิก
-              </Button>
-              <Button type="submit">บันทึก</Button>
-            </div>
-          </form>
-        )}
+function EditStaffDialog({
+  open,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    reset,
+    watch,
+  } = useForm<StaffInput>({
+    resolver: zodResolver(staffSchema),
+    defaultValues: { name: "", username: "",password: "", role: "staff" },
+  });
+
+  // reset ฟอร์มทุกครั้งที่ปิด dialog
+  useEffect(() => {
+    if (!open) reset();
+  }, [open, reset]);
+
+  const onSubmit = async (data: StaffInput) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/createstaff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error();
+      onCreated();
+      onClose();
+    } catch {
+      toast.error("บันทึกไม่สำเร็จ ลองใหม่ภายหลัง");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>เพิ่มกรรมการ</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Name */}
+          <div>
+            <Input
+              {...register("name")}
+              placeholder="ชื่อ"
+              disabled={loading}
+            />
+            {errors.name && (
+              <p className="text-destructive text-xs mt-1">{errors.name.message}</p>
+            )}
+          </div>
+          {/* Username */}
+          <div>
+            <Input
+              {...register("username")}
+              placeholder="Username"
+              disabled={loading}
+            />
+            {errors.username && (
+              <p className="text-destructive text-xs mt-1">{errors.username.message}</p>
+            )}
+          </div>
+          {/* Role */}
+          <div>
+            <Select
+              value={watch("role")}
+              onValueChange={(v) => setValue("role", v as "staff" | "admin", { shouldValidate: true })}
+              disabled={loading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="เลือก Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="staff">Staff</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.role && (
+              <p className="text-destructive text-xs mt-1">{errors.role.message}</p>
+            )}
+          </div>
+          {/* Actions */}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" type="button" onClick={onClose} disabled={loading}>
+              ยกเลิก
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              บันทึก
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -154,6 +380,7 @@ export default function StaffTable({
   const [editOpen, setEditOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
 
   const onSort = (s: { by: string; order: "asc" | "desc" }) => {
     setCurrentSort(s)
@@ -337,33 +564,37 @@ export default function StaffTable({
         body: JSON.stringify({ ids }),
       });
       if (!res.ok) throw new Error('ไม่สามารถลบได้')
-      window.location.reload();
-      setConfirmOpen(false);
-      table.resetRowSelection();
+      window.location.reload()
+      setConfirmOpen(false)
+      table.resetRowSelection()
     } catch {
       toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่ในภายหลัง")
+      throw new Error("Internal Error")
     } finally {
-      setDeleteLoading(false);
+      setDeleteLoading(false)
     }
   };
 
   const deleteSingle = async () => {
-    if (!editingStaff) return;
-    setDeleteLoading(true);
+    if (!editingStaff) return
+    setDeleteLoading(true)
     try {
-      const res = await fetch('/api/admin/deletestaff', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/deletestaff", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: [editingStaff.id] }),
-      });
-      if (!res.ok) throw new Error('Delete failed')
-      window.location.reload()
-    } catch {
-      alert('เกิดข้อผิดพลาดขณะลบ');
-    } finally {
-      setDeleteLoading(false)
+      })
+      if (!res.ok) throw new Error("ไม่สามารถลบได้");
       setConfirmOpen(false)
-    }
+      table.resetRowSelection()
+      setEditingStaff(null)
+      window.location.reload()
+  } catch {
+      toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่ในภายหลัง")
+      throw new Error("Internal Error")
+  } finally {
+      setDeleteLoading(false)
+  }
   };
 
   /* ----------------------------- UI ------------------------- */
@@ -377,6 +608,9 @@ export default function StaffTable({
         count={selectedCount || 1}
         loading={deleteLoading}
       />
+
+      {/* --- add dialog --- */}
+      <AddStaffDialog open={addOpen} onClose={() => setAddOpen(false)} onCreated={()=> window.location.reload} />
 
       {/* --- edit dialog --- */}
       <EditStaffDialog open={editOpen} onClose={() => setEditOpen(false)} staff={editingStaff} />
@@ -395,7 +629,9 @@ export default function StaffTable({
             className="max-w-xs md:max-w-md lg:max-w-lg ml-auto"
           />
           <div className="ml-auto flex flex-nowrap">
-            <AddButton />
+            <AddButton
+              onClick= {()=> setAddOpen(true)}
+            />
             <DeleteButton
               selectedCount={selectedCount}
               onClick={() => {
@@ -403,19 +639,6 @@ export default function StaffTable({
                 setConfirmOpen(true);
               }}
             />
-            {/* bulk delete button */}
-            {/* <Button
-              variant="destructive"
-              size="sm"
-              className="ml-2"
-              disabled={!selectedCount}
-              onClick={() => {
-                setEditingStaff(null);
-                setConfirmOpen(true);
-              }}
-            >
-              Delete {selectedCount ? `(${selectedCount})` : ""}
-            </Button> */}
           </div>
         </div>
 

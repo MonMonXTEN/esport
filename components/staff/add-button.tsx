@@ -1,18 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-export default function AddButton() {
+type AddButtonProps = { onClick: () => void }
+
+export default function AddButton({ onClick }: AddButtonProps) {
   return (
     <Button
       variant="secondary"
       size="sm"
-      className="ml-2"
-      onClick={() => {
-        // Todo
-      }}
+      className="ml-2 cursor-pointer"
+      onClick={onClick}
     >
       <Plus />
-      <span className="hidden lg:inline">Add Staff</span>
+      <span className="hidden lg:inline">Add</span>
     </Button>
   )
 }

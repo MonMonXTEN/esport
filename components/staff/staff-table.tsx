@@ -30,6 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog";
@@ -65,6 +66,7 @@ import { staffSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
+import { Label } from "@/components/ui/label";
 
 export interface Staff {
   id: string
@@ -132,7 +134,8 @@ function AddStaffDialog({
   onClose: () => void;
   onCreated: () => void;
 }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
+  const [hasCreated, setHasCreated] = useState(false)
 
   const {
     register,
@@ -144,50 +147,55 @@ function AddStaffDialog({
   } = useForm<z.infer<typeof staffSchema>>({
     resolver: zodResolver(staffSchema),
     defaultValues: { name: "", username: "", password: "", role: "staff" },
-  });
+  })
 
-  useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
+  const handleDialogClose = () => {
+    onClose()
+    if (hasCreated) {
+      onCreated()
+      setHasCreated(false)
+    }
+  }
 
-  const onSubmit = async (data: any) => {
-    setLoading(true);
+  const onSubmit = async (data: z.infer<typeof staffSchema>) => {
+    setLoading(true)
     try {
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch("/api/admin/createstaff", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error();
-      onCreated();
-      onClose();
+      if (!res.ok) throw new Error()
+      toast.success("บันทึกสำเร็จ")
+      setHasCreated(true)
+      reset()
     } catch {
-      toast.error("บันทึกไม่สำเร็จ ลองใหม่ภายหลัง");
+      toast.error("บันทึกไม่สำเร็จ ลองใหม่ภายหลัง")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>เพิ่มกรรมการ</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Name */}
           <div>
+            <Label className="mb-3">ชื่อ <span className="text-gray-400 font-normal">(ไม่จำเป็นต้องระบุ)</span></Label>
             <Input
               {...register("name")}
-              placeholder="ชื่อ"
+              placeholder="Name"
               disabled={loading}
             />
             {errors.name && (
               <p className="text-destructive text-xs mt-1">{errors.name.message}</p>
             )}
           </div>
-          {/* Username */}
           <div>
+            <Label className="mb-3">ชื่อผู้ใช้</Label>
             <Input
               {...register("username")}
               placeholder="Username"
@@ -197,20 +205,20 @@ function AddStaffDialog({
               <p className="text-destructive text-xs mt-1">{errors.username.message}</p>
             )}
           </div>
-          {/* Password */}
           <div>
+            <Label className="mb-3">รหัสผ่าน</Label>
             <Input
               type="password"
               {...register("password")}
-              placeholder="รหัสผ่าน"
+              placeholder="Password"
               disabled={loading}
             />
             {errors.password && (
               <p className="text-destructive text-xs mt-1">{errors.password.message}</p>
             )}
           </div>
-          {/* Role */}
           <div>
+            <Label className="mb-3">หน้าที่</Label>
             <Select
               value={watch("role")}
               onValueChange={v => setValue("role", v as "staff" | "admin", { shouldValidate: true })}
@@ -229,10 +237,10 @@ function AddStaffDialog({
             )}
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" type="button" onClick={onClose} disabled={loading}>
+            <Button className="cursor-pointer" variant="outline" type="button" onClick={handleDialogClose} disabled={loading}>
               ยกเลิก
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button className="cursor-pointer" type="submit" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               บันทึก
             </Button>
@@ -263,7 +271,7 @@ function EditStaffDialog({
     watch,
   } = useForm<StaffInput>({
     resolver: zodResolver(staffSchema),
-    defaultValues: { name: "", username: "",password: "", role: "staff" },
+    defaultValues: { name: "", username: "", password: "", role: "staff" },
   });
 
   // reset ฟอร์มทุกครั้งที่ปิด dialog
@@ -589,12 +597,12 @@ export default function StaffTable({
       table.resetRowSelection()
       setEditingStaff(null)
       window.location.reload()
-  } catch {
+    } catch {
       toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่ในภายหลัง")
       throw new Error("Internal Error")
-  } finally {
+    } finally {
       setDeleteLoading(false)
-  }
+    }
   };
 
   /* ----------------------------- UI ------------------------- */
@@ -610,7 +618,7 @@ export default function StaffTable({
       />
 
       {/* --- add dialog --- */}
-      <AddStaffDialog open={addOpen} onClose={() => setAddOpen(false)} onCreated={()=> window.location.reload} />
+      <AddStaffDialog open={addOpen} onClose={() => setAddOpen(false)} onCreated={() => window.location.reload()} />
 
       {/* --- edit dialog --- */}
       <EditStaffDialog open={editOpen} onClose={() => setEditOpen(false)} staff={editingStaff} />
@@ -630,7 +638,7 @@ export default function StaffTable({
           />
           <div className="ml-auto flex flex-nowrap">
             <AddButton
-              onClick= {()=> setAddOpen(true)}
+              onClick={() => setAddOpen(true)}
             />
             <DeleteButton
               selectedCount={selectedCount}
@@ -716,5 +724,5 @@ export default function StaffTable({
         </div>
       </div>
     </>
-  );
+  )
 }

@@ -25,7 +25,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
           if (user && (await bcrypt.compare(password, user.password))) {
             return {
-              id: user.id,
+              id: user.id.toString(),
               username: user.username,
               name: user.name,
               role: user.role,
@@ -51,6 +51,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   session: {
     strategy: "jwt",
+    // maxAge: 4 * 60 *60,
+    // updateAge: 20 * 60,
+  },
+  jwt: {
+    // maxAge: 4 * 60 * 60,
   },
   callbacks: {
     jwt({ token, user }) {

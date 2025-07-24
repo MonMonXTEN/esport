@@ -5,6 +5,7 @@ import "./globals.css";
 import ReactQueryProvider from "@/components/providers/react-query-provider";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
+import ToastInitializer from "@/components/providers/ToastInitializer";
 
 const font = Noto_Sans_Thai({
   subsets: ['thai', 'latin'],
@@ -37,6 +38,7 @@ export default async function RootLayout({
             <Toaster
               position="top-right"
             />
+            <ToastInitializer />
             {children}
           </ReactQueryProvider>
         </SessionProvider>

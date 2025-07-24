@@ -1,6 +1,7 @@
 import db from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { staffSchema } from "@/lib/zod"
+import z from "zod"
 
 export const runtime = "nodejs"
 
@@ -33,23 +34,19 @@ export async function POST(request: Request) {
       },
       select: {
         id: true,
-        name: true,
-        username: true,
-        role: true,
-        createdAt: true,
       }
-    });
+    })
 
     return Response.json({
-      message: "create user ok",
-      data: newUser,
+      message: `สร้างบัญชีผู้ใช้สำเร็จ (#ID ${newUser.id})`,
     }, { status: 201 })
 
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(error.message);
-    } else {
-      console.error("Unknown error", error);
-    }
+  } catch (err) {
+    // if (err instanceof z.ZodError) {
+    //   return Response.json({ message: err.issues }, { status: 422 });
+    // }
+
+    console.error("[createStaff]", err);
+    return Response.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -10,7 +10,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import LogoSidebar from "./HeadSidebar"
+import HeaderSidebar from "./HeaderSidebar"
+import FooterSidebar from "./FooterSidebar"
 import { sidebarItems } from "./SidebarItems"
 
 
@@ -18,7 +19,7 @@ export default function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <LogoSidebar />
+        <HeaderSidebar />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -40,7 +41,7 @@ export default function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        FOOTER
+        <FooterSidebar />
       </SidebarFooter>
     </Sidebar>
   )

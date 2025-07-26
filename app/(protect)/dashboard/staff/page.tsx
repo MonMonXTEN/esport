@@ -6,5 +6,9 @@ export const metadata: Metadata = {
 }
 
 export default function Staff() {
-  return <StaffPageClient />
+  return (
+    <div className="p-2">
+      <StaffPageClient />
+    </div>
+  )
 }

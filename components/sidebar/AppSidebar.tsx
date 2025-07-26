@@ -1,9 +1,4 @@
 import {
-  Home,
-  UserCog,
-} from "lucide-react"
-
-import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -15,22 +10,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import LogoSidebar from "./logo-sidebar"
+import LogoSidebar from "./HeadSidebar"
+import { sidebarItems } from "./SidebarItems"
 
-const items = [
-  {
-    title: "แดชบอร์ด",
-    url: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "รายชื่อกรรมการ",
-    url: "/dashboard/staff",
-    icon: UserCog,
-  },
-]
 
-export function AppSidebar() {
+export default function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -41,7 +25,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Staff Panel</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item)=> (
+              {sidebarItems.map((item)=> (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>

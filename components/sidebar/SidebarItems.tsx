@@ -1,0 +1,17 @@
+import {
+  Home,
+  UserCog,
+} from "lucide-react"
+
+export const sidebarItems = [
+  {
+    title: "แดชบอร์ด",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "รายชื่อกรรมการ",
+    url: "/dashboard/staff",
+    icon: UserCog,
+  },
+]

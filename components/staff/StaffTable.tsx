@@ -394,30 +394,26 @@ export default function StaffTable({
               {selectedCount} จาก {table.getFilteredRowModel().rows.length} แถวที่เลือก
             </span>
           </div>
-          <div className="flex flex-col justify-center items-center gap-3">
-            <div>
-              <span className="text-muted-foreground">
-                หน้า {page} / {Math.ceil(total / pageSize) || 1}
-              </span>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(page - 1)}
-                disabled={page === 1 || isLoading}
-              >
-                <ChevronLeft />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onPageChange(page + 1)}
-                disabled={page * pageSize >= total || isLoading}
-              >
-                <ChevronRight />
-              </Button>
-            </div>
+          <div className="flex justify-center items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page - 1)}
+              disabled={page === 1 || isLoading}
+            >
+              <ChevronLeft />
+            </Button>
+            <span className="text-muted-foreground">
+              หน้า {page} / {Math.ceil(total / pageSize) || 1}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page + 1)}
+              disabled={page * pageSize >= total || isLoading}
+            >
+              <ChevronRight />
+            </Button>
           </div>
           <div>
             <span className="text-muted-foreground">

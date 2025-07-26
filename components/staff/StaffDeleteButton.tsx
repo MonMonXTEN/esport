@@ -20,7 +20,7 @@ export default function DeleteButton({
       onClick={onClick}
     >
       <Trash2 />
-      <span className="hidden lg:inline">Delete {selectedCount ? `(${selectedCount})` : ""}</span>
+      <span className="hidden lg:inline">ลบ {selectedCount ? `(${selectedCount})` : ""}</span>
     </Button>
   )
 }

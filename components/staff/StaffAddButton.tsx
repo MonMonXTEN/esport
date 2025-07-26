@@ -12,7 +12,7 @@ export default function AddButton({ onClick }: AddButtonProps) {
       onClick={onClick}
     >
       <Plus />
-      <span className="hidden lg:inline">Add</span>
+      <span className="hidden lg:inline">เพิ่ม</span>
     </Button>
   )
 }

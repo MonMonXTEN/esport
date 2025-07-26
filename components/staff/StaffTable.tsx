@@ -26,12 +26,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
-import {
   Table,
   TableBody,
   TableCell,
@@ -44,21 +38,18 @@ import {
   MoreHorizontal,
   Trash2,
   Pencil,
-  Loader2
+  Loader2,
+  ChevronRight,
+  ChevronLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner"
-import AddButton from "./add-button";
-import DeleteButton from "./delete-button";
-import EditStaffDialog from "./editstaffdialog";
-import AddStaffDialog from "./addstaffdialog";
-
-export interface Staff {
-  id: string
-  name: string
-  username: string
-  role: "staff" | "admin"
-};
+import AddButton from "./StaffAddButton";
+import DeleteButton from "./StaffDeleteButton";
+import AddStaffDialog from "./AddStaffDialog";
+import EditStaffDialog from "./EditStaffDialog";
+import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
+import { Staff } from "@/lib/types/staff";
 
 interface StaffTableProps {
   data: Staff[]
@@ -68,46 +59,6 @@ interface StaffTableProps {
   isLoading: boolean
   onPageChange: (page: number) => void
   onSortChange: (sort: { by: string; order: "asc" | "desc" }) => void
-}
-
-/* Dialog ConfirmDelete */
-function ConfirmDeleteDialog({
-  open,
-  onClose,
-  onConfirm,
-  count,
-  loading = false
-}: {
-  open: boolean
-  onClose: () => void
-  onConfirm: () => void
-  count: number
-  loading?: boolean
-}) {
-  return (
-    <Dialog open={open} onOpenChange={loading ? undefined : onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>ยืนยันการลบ</DialogTitle>
-        </DialogHeader>
-        <p className="py-4">คุณต้องการลบรายการจำนวน {count} รายการใช่หรือไม่?</p>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" className="cursor-pointer" disabled={loading} onClick={onClose}>
-            ยกเลิก
-          </Button>
-          <Button variant="destructive" className="cursor-pointer" disabled={loading} onClick={onConfirm}>
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="animate-spin w-4 h-4" /> กำลังลบ...
-              </span>
-            ) : (
-              "ลบ"
-            )}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 /* Main Table */
@@ -224,23 +175,6 @@ export default function StaffTable({
         </Button>
       ),
     },
-    // {
-    //   accessorKey: "name",
-    //   header: ({ column }) => (
-    //     <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-    //       Name <ArrowUpDown className="ml-1 h-3 w-3" />
-    //     </Button>
-    //   ),
-    // },
-    // {
-    //   accessorKey: "username",
-    //   header: ({ column }) => (
-    //     <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-    //       Username <ArrowUpDown className="ml-1 h-3 w-3" />
-    //     </Button>
-    //   ),
-    //   cell: ({ row }) => <span className="font-mono">{row.getValue<string>("username")}</span>,
-    // },
     { accessorKey: "role", header: "Role" },
     {
       id: "actions",
@@ -354,12 +288,10 @@ export default function StaffTable({
     } finally {
       setDeleteLoading(false)
     }
-  };
-
-  /* ----------------------------- UI ------------------------- */
+  }
   return (
     <>
-      {/* --- delete confirmation dialogs --- */}
+      {/* --- delete confirm dialog --- */}
       <ConfirmDeleteDialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
@@ -391,7 +323,7 @@ export default function StaffTable({
         {/* top bar */}
         <div className="flex items-center py-4">
           <Input
-            placeholder="Search id / name / username..."
+            placeholder="ค้นหา id / name / username..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value)
@@ -446,7 +378,7 @@ export default function StaffTable({
                 ) : (
                   <TableRow>
                     <TableCell colSpan={columns.length} className="h-24 text-center">
-                      No results.
+                      ไม่พบข้อมูล
                     </TableCell>
                   </TableRow>
                 )
@@ -459,13 +391,13 @@ export default function StaffTable({
         <div className="flex items-start justify-between gap-2 text-sm py-4 px-2">
           <div>
             <span className="text-muted-foreground flex-1">
-              {selectedCount} of {table.getFilteredRowModel().rows.length} row(s) selected
+              {selectedCount} จาก {table.getFilteredRowModel().rows.length} แถวที่เลือก
             </span>
           </div>
           <div className="flex flex-col justify-center items-center gap-3">
             <div>
               <span className="text-muted-foreground">
-                Page {page} / {Math.ceil(total / pageSize) || 1}
+                หน้า {page} / {Math.ceil(total / pageSize) || 1}
               </span>
             </div>
             <div className="flex gap-3">
@@ -475,7 +407,7 @@ export default function StaffTable({
                 onClick={() => onPageChange(page - 1)}
                 disabled={page === 1 || isLoading}
               >
-                Prev
+                <ChevronLeft />
               </Button>
               <Button
                 variant="outline"
@@ -483,13 +415,13 @@ export default function StaffTable({
                 onClick={() => onPageChange(page + 1)}
                 disabled={page * pageSize >= total || isLoading}
               >
-                Next
+                <ChevronRight />
               </Button>
             </div>
           </div>
           <div>
             <span className="text-muted-foreground">
-              {total.toLocaleString()} records
+              {total.toLocaleString()} รายการ
             </span>
           </div>
         </div>

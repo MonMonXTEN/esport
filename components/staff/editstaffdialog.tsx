@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { Staff } from "./staff-table"
 import z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -22,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { staffSchema } from "@/lib/zod"
+import { Staff } from "@/lib/types/staff"
 
 const editStaffSchema = staffSchema.omit({ username: true, password: true })
 

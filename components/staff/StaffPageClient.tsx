@@ -1,15 +1,16 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState } from "react"
 import {
   QueryClient,
   QueryClientProvider,
   keepPreviousData,
   useQuery,
-} from "@tanstack/react-query";
-import StaffTable, { Staff } from "@/components/staff/staff-table";
+} from "@tanstack/react-query"
+import StaffTable from "@/components/staff/StaffTable"
+import { Staff } from "@/lib/types/staff"
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 export default function StaffPage() {
   /* UI state (page & sort) */
@@ -59,5 +60,5 @@ export default function StaffPage() {
         />
       </section>
     </QueryClientProvider>
-  );
+  )
 }

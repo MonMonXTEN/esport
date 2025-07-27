@@ -136,51 +136,5 @@ export default function EditStaffDialog({
         </form>
       </DialogContent>
     </Dialog>
-
-
-
-    // <Dialog open={open} onOpenChange={onClose}>
-    //   <DialogContent className="sm:max-w-md">
-    //     <DialogHeader>
-    //       <DialogTitle>แก้ไขกรรมการ</DialogTitle>
-    //     </DialogHeader>
-    //     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-    //       {/* Name */}
-    //       <Input {...register("name")} placeholder="ชื่อ" disabled={loading} />
-    //       {errors.name && <p className="text-destructive text-xs mt-1">{errors.name.message}</p>}
-
-    //       {/* Username */}
-    //       <Input {...register("username")} placeholder="Username" disabled={loading} />
-    //       {errors.username && <p className="text-destructive text-xs mt-1">{errors.username.message}</p>}
-
-    //       {/* Role */}
-    //       <Select
-    //         value={watch("role")}
-    //         onValueChange={(v) => setValue("role", v as "staff" | "admin", { shouldValidate: true })}
-    //         disabled={loading}
-    //       >
-    //         <SelectTrigger>
-    //           <SelectValue placeholder="เลือก Role" />
-    //         </SelectTrigger>
-    //         <SelectContent>
-    //           <SelectItem value="staff">Staff</SelectItem>
-    //           <SelectItem value="admin">Admin</SelectItem>
-    //         </SelectContent>
-    //       </Select>
-    //       {errors.role && <p className="text-destructive text-xs mt-1">{errors.role.message}</p>}
-
-    //       {/* Actions */}
-    //       <div className="flex justify-end gap-2">
-    //         <Button variant="outline" type="button" onClick={onClose} disabled={loading}>
-    //           ยกเลิก
-    //         </Button>
-    //         <Button type="submit" disabled={loading}>
-    //           {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-    //           บันทึก
-    //         </Button>
-    //       </div>
-    //     </form>
-    //   </DialogContent>
-    // </Dialog>
   )
 }

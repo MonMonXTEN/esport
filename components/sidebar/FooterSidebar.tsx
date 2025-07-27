@@ -6,9 +6,10 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import {
   EllipsisVertical,
+  Loader2,
   LogOut
 } from "lucide-react";
 import {
@@ -16,22 +17,19 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   useSidebar
-} from "../ui/sidebar";
+} from "@/components/ui/sidebar";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage
-} from "../ui/avatar";
+} from "@/components/ui/avatar";
 import { signOut } from "next-auth/react";
+import useProfile from "@/hooks/use-profile";
 
-const user = {
-  avatar: "https://github.com/shadcn.png",
-  name: "Robinhood",
-  username: "admin",
-  role: "staff",
-}
+const avatar = "https://github.com/shadcn.png"
 
 export default function FooterSidebar() {
+  const { data, isLoading } = useProfile()
   const { isMobile } = useSidebar()
   return (
     <SidebarMenu>
@@ -43,13 +41,13 @@ export default function FooterSidebar() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
               <Avatar className="h-8 w-8 rounded-full grayscale">
-                <AvatarImage src={user.avatar} alt={user.username} />
-                <AvatarFallback>{user.name.slice(0,2)}</AvatarFallback>
+                <AvatarImage src={avatar} alt={data?.username} />
+                <AvatarFallback><Loader2 className="mx-auto h-4 w-4 animate-spin" /></AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{isLoading ? "กำลังโหลด" : data.name}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user.username}
+                  {data?.role}
                 </span>
               </div>
               <EllipsisVertical className="ml-auto size-4" />
@@ -64,13 +62,13 @@ export default function FooterSidebar() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.slice(0,2)}</AvatarFallback>
+                  <AvatarImage src={avatar} alt={data?.username} />
+                  <AvatarFallback><Loader2 className="mx-auto h-4 w-4 animate-spin" /></AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{data?.name}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.username}
+                    @{data?.username}
                   </span>
                 </div>
               </div>

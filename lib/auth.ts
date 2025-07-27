@@ -27,7 +27,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             return {
               id: user.id.toString(),
               username: user.username,
-              name: user.name,
               role: user.role,
             }
           } else {
@@ -51,52 +50,30 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   session: {
     strategy: "jwt",
-    // maxAge: 4 * 60 *60,
-    // updateAge: 20 * 60,
+    maxAge: 4 * 60 *60,
+    updateAge: 20 * 60,
   },
   jwt: {
-    // maxAge: 4 * 60 * 60,
+    maxAge: 4 * 60 * 60,
   },
   callbacks: {
     jwt({ token, user }) {
-      const clonedToken = token
       if (user) {
-        clonedToken.id = user.id
-        clonedToken.username = user.username
-        clonedToken.name = user?.name
-        clonedToken.role = user.role
+        token.id = user.id
+        token.username = user.username
+        // token.name = user?.name
+        token.role = user.role
       }
-       return clonedToken
+       return token
     },
     session({ session, token }) {
-      const clonedSession = session
-      if (clonedSession.user) {
-        clonedSession.user.id = token.id as string
-        clonedSession.user.username = token.username
-        clonedSession.user.name = token.name
-        clonedSession.user.role = token.role
+      if (session.user) {
+        session.user.id = token.id as string
+        session.user.username = token.username
+        // session.user.name = token.name
+        session.user.role = token.role
       }
-      return clonedSession
+      return session
     }
   }
-  // callbacks: {
-  //   jwt: async ({ token, user }) => {
-  //     if (user) {
-  //       token.id = user.id
-  //       token.username = user.username
-  //       token.name = user.name
-  //       token.role = user.role
-  //     }
-  //     return token
-  //   },
-  //   session: async ({ session, token }) => {
-  //     if (session.user) {
-  //       session.user.id = token.id as string
-  //       session.user.username = token.username as string
-  //       session.user.name = token.name as string
-  //       session.user.role = token.role as string
-  //     }
-  //     return session
-  //   }
-  // }
 })

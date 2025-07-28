@@ -36,7 +36,7 @@ export default function StaffPage() {
         sortBy: sort.by,
         order: sort.order,
       });
-      const res = await fetch(`/api/admin/getstaff?${params.toString()}`);
+      const res = await fetch(`/api/staff/lists?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch");
       return res.json();
     },

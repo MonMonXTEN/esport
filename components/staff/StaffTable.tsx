@@ -249,7 +249,7 @@ export default function StaffTable({
     const ids = selectedRows.map(r => r.original.id)
     setDeleteLoading(true)
     try {
-      const res = await fetch('/api/admin/deletestaff', {
+      const res = await fetch('/api/staff/delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids }),
@@ -271,7 +271,7 @@ export default function StaffTable({
     if (!editingStaff) return
     setDeleteLoading(true)
     try {
-      const res = await fetch("/api/admin/deletestaff", {
+      const res = await fetch("/api/staff/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: [editingStaff.id] }),

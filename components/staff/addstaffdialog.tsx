@@ -59,7 +59,7 @@ export default function AddStaffDialog({
   const onSubmit = async (data: z.infer<typeof staffSchema>) => {
     setLoading(true)
     try {
-      const res = await fetch("/api/staff/create", {
+      const res = await fetch("/api/staffs/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

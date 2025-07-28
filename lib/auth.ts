@@ -31,7 +31,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             }
           } else {
             if (process.env.NODE_ENV === "development") {
-              console.log(`Invalid email or password | ${credentials.username}}`)
+              console.log(`Invalid email or password | ${credentials.username}`)
               return null
             }
           }

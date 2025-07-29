@@ -20,12 +20,80 @@ enum Role {
 }
 
 model User {
-  id        Int   @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String?
   username  String   @unique
   email     String?  @unique
   password  String
-  role      Role   @default(staff)
+  role      Role     @default(staff)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum BracketType {
+  SINGLE_ELIM
+  DOUBLE_ELIM
+}
+
+enum TournamentStatus {
+  DRAFT
+  LIVE
+  PENDING
+}
+
+enum MatchStatus {
+  PENDING
+  DONE
+}
+
+model Team {
+  id              Int              @id @default(autoincrement())
+  name            String
+  status          Boolean          @default(true) // เช็คมาหรือไม่มา
+  blueMatches     Match[]          @relation("blueTeamMatches")
+  redMatches      Match[]          @relation("redTeamMatches")
+  winnerMatches   Match[]          @relation("winnerMatches")
+  tournamentTeams TournamentTeam[]
+}
+
+model Tournament {
+  id              Int              @id @default(autoincrement())
+  name            String
+  bracket         BracketType
+  status          TournamentStatus @default(DRAFT)
+  rounds          Int              @default(5) // รอบในการแข่งขัน 32>16>8>4>2 มี 5 รอบ
+  matches         Match[]
+  tournamentTeams TournamentTeam[]
+  createdAt       DateTime         @default(now())
+  startedAt       DateTime?
+}
+
+model TournamentTeam {
+  id           Int        @id @default(autoincrement())
+  teamId       Int
+  team         Team       @relation(fields: [teamId], references: [id])
+  tournamentId Int
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  seed         Int?
+}
+
+model Match {
+  id            Int         @id @default(autoincrement())
+  tournamentId  Int
+  tournament    Tournament  @relation(fields: [tournamentId], references: [id])
+  round         Int // รอบในการแข่งขัน 32>16>8>4>2 มี 5 รอบ
+  matchNo       Int // ลำดับในรอบ (1-32, 1-16, 1-8,..)
+  blueTeamId    Int
+  redTeamId     Int
+  blueTeam      Team?       @relation("blueTeamMatches", fields: [blueTeamId], references: [id])
+  redTeam       Team?       @relation("redTeamMatches", fields: [redTeamId], references: [id])
+  scoreBlue     Int         @default(0)
+  scoreRed      Int         @default(0)
+  bestOf        Int // 1 = BO1, 3 = BO3, 5 = BO5
+  signatureBlue String?     @db.LongText
+  signatureRed  String?     @db.LongText
+  signedAt      DateTime?
+  winnerId      Int?
+  winner        Team?       @relation("winnerMatches", fields: [winnerId], references: [id])
+  status        MatchStatus @default(PENDING)
 }

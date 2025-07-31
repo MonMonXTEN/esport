@@ -5,7 +5,6 @@ import { toast } from "sonner"
 
 export default function useDeleteTeams(
   afterSuccess?: () => void,
-  afterFinally?: () => void
 ) {
   const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -15,16 +14,15 @@ export default function useDeleteTeams(
       setDeleteLoading(true)
       try {
         await deleteTeams(ids)
-        toast.success(`ลบ ${ids.length} รายการเรียบร้อย`)
+        toast.success(`ลบ ${ids.length} รายการเรียบร้อยแล้ว`)
         afterSuccess?.()
       } catch (e: unknown) {
         toast.error((e as Error).message || "ลบไม่สำเร็จ")
       } finally {
         setDeleteLoading(false)
-        afterFinally?.()
       }
     },
-    [afterSuccess, afterFinally]
+    [afterSuccess]
   )
 
   return { deleteLoading, deleteTeamsByIds }

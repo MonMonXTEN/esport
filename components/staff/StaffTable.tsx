@@ -43,8 +43,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner"
-import AddButton from "./StaffAddButton";
-import DeleteButton from "./StaffDeleteButton";
+import AddButton from "../TableAddButton";
+import DeleteButton from "../TableDeleteButton";
 import AddStaffDialog from "./AddStaffDialog";
 import EditStaffDialog from "./EditStaffDialog";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog";

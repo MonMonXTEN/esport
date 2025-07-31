@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -37,13 +38,15 @@ import {
   Pencil,
   Trash2
 } from "lucide-react"
-import { Team } from "@/lib/types/team"
-import { useState } from "react"
-import useTeams from "@/hooks/useTeams"
 import { toast } from "sonner"
+import { Team } from "@/lib/types/team"
+import useTeams from "@/hooks/useTeams"
+import useDeleteTeams from "@/hooks/useDeleteTeams"
 import EditTeamDialog from "./EditTeamDialog"
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog"
-import useDeleteTeams from "@/hooks/useDeleteTeams"
+import DeleteButton from "../TableDeleteButton"
+import AddButton from "../TableAddButton"
+import AddTeamDialog from "./AddTeamDialog"
 
 async function toggleStatus(id: number, next: boolean) {
   const res = await fetch("/api/teams/status", {
@@ -66,8 +69,10 @@ export default function TeamTable() {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [addOpen, setAddOpen] = useState(false)
   const [editingTeam, setEditingTeam] = useState<Team | null>(null)
   const [deletingTeam, setDeletingTeam] = useState<Team | null>(null)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
 
   const columns: ColumnDef<Team>[] = [
     {
@@ -163,6 +168,7 @@ export default function TeamTable() {
                 <DropdownMenuItem
                   onClick={() => {
                     setDeletingTeam(team)
+                    setConfirmDeleteOpen(true)
                   }}
                   className="cursor-pointer"
                 >
@@ -201,12 +207,19 @@ export default function TeamTable() {
   const { deleteLoading, deleteTeamsByIds } = useDeleteTeams(
     () => {
       table.resetRowSelection()
+      setConfirmDeleteOpen(false)
       setDeletingTeam(null)
     },
   )
   const onConfirmDelete = () => selectedIds.length ? deleteTeamsByIds(selectedIds) : deletingTeam && deleteTeamsByIds([deletingTeam.id])
   return (
     <>
+
+      <AddTeamDialog
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+      />
+
       <EditTeamDialog
         open={!!editingTeam}
         team={editingTeam}
@@ -215,8 +228,13 @@ export default function TeamTable() {
         }}
       />
       <ConfirmDeleteDialog
-        open={!!deletingTeam}
-        onClose={() => !deleteLoading && setDeletingTeam(null)}
+        open={confirmDeleteOpen}
+        onClose={() => {
+          if (!deleteLoading) {
+            setConfirmDeleteOpen(false)
+            setDeletingTeam(null)
+          }
+        }}
         onConfirm={onConfirmDelete}
         count={selectedIds.length || 1}
         loading={deleteLoading}
@@ -230,8 +248,19 @@ export default function TeamTable() {
             onChange={(event) =>
               table.getColumn("name")?.setFilterValue(event.target.value)
             }
-            className="max-w-sm"
+            className="max-w-xs md:max-w-md lg:max-w-lg ml-auto"
           />
+          <div className="ml-auto flex flex-nowrap">
+            <AddButton
+              onClick={() => setAddOpen(true)}
+            />
+            <DeleteButton
+              selectedCount={selectedIds.length}
+              onClick={() => {
+                setConfirmDeleteOpen(true)
+              }}
+            />
+          </div>
         </div>
         <div className="overflow-hidden rounded-md border">
           <Table>

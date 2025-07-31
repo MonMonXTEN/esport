@@ -28,6 +28,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
@@ -320,29 +329,74 @@ export default function TeamTable() {
             </TableBody>
           </Table>
         </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="text-muted-foreground flex-1 text-sm">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
+
+        <div className="text-sm text-muted-foreground p-2">
+          {table.getFilteredSelectedRowModel().rows.length} จาก {" "}
+          {table.getFilteredRowModel().rows.length} แถวที่เลือก
+        </div>
+
+        <div className="flex items-center justify-between py-1 flex-wrap gap-2">
+          <Pagination>
+            <PaginationContent>
+              {/* Previous */}
+              <PaginationItem>
+                <PaginationPrevious
+
+                  onClick={() => table.previousPage()}
+                  aria-disabled={!table.getCanPreviousPage()}
+                  className={!table.getCanPreviousPage() ? "pointer-events-none opacity-50 user select-none" : "cursor-pointer select-none"}
+                />
+              </PaginationItem>
+
+              {/* จำนวนหน้า */}
+              {(() => {
+                const pageCount = table.getPageCount()
+                const current = pagination.pageIndex
+                const pages: number[] = []
+
+                if (pageCount <= 7) {
+                  pages.push(...Array.from({ length: pageCount }, (_, i) => i))
+                } else {
+                  pages.push(0)
+                  if (current > 3) pages.push(-1)
+
+                  const start = Math.max(1, current - 1)
+                  const end = Math.min(pageCount - 2, current + 1)
+                  for (let i = start; i <= end; i++) pages.push(i)
+
+                  if (current < pageCount - 4) pages.push(-1)
+                  pages.push(pageCount - 1)
+                }
+
+                return pages.map((page) =>
+                  page === -1 ? (
+                    <PaginationItem key={page + Math.random()}>
+                      <PaginationEllipsis className="select-none" />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        isActive={page === current}
+                        onClick={() => table.setPageIndex(page)}
+                        className="cursor-pointer select-none"
+                      >
+                        {page + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                )
+              })()}
+
+              {/* Next */}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => table.nextPage()}
+                  aria-disabled={!table.getCanNextPage()}
+                  className={!table.getCanNextPage() ? "pointer-events-none opacity-50 select-none" : "cursor-pointer select-none"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       </div>
     </>

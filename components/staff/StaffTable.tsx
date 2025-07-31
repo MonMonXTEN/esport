@@ -12,7 +12,6 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
-  VisibilityState,
 } from "@tanstack/react-table"
 import { rankItem } from "@tanstack/match-sorter-utils"
 import {
@@ -79,7 +78,6 @@ export default function StaffTable({
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [search, setSearch] = useState("")
 
@@ -230,10 +228,9 @@ export default function StaffTable({
     manualPagination: true,
     pageCount: Math.ceil(total / pageSize),
     globalFilterFn: fuzzyFilter,
-    state: { sorting, columnFilters, columnVisibility, rowSelection },
+    state: { sorting, columnFilters, rowSelection },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -377,7 +374,7 @@ export default function StaffTable({
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                    <TableCell colSpan={columns.length} className="h-12 text-center">
                       ไม่พบข้อมูล
                     </TableCell>
                   </TableRow>

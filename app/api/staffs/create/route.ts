@@ -1,9 +1,6 @@
 import db from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { staffSchema } from "@/lib/zod"
-import z from "zod"
-
-export const runtime = "nodejs"
 
 export async function POST(request: Request) {
   try {

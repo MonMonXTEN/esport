@@ -69,7 +69,7 @@ export default function EditStaffDialog({
 
     try {
       const res = await fetch("/api/staffs/update", {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: staff.id, ...data }),
       })

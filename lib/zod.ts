@@ -15,3 +15,8 @@ export const staffSchema = z.object({
   password: z.string().min(1, "กรุณากรอกรหัสผ่าน"),
   role: z.enum(["staff", "admin"], { error: "กรุณาเลือก Role" }),
 })
+
+export const teamSchema = z.object({
+  name: z.string().min(1, "กรุณากรอกชื่อทีม"),
+  status: z.boolean().optional(),
+})

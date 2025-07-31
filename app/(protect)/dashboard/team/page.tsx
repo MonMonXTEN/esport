@@ -1,3 +1,4 @@
+import TeamTable from "@/components/team/TeamTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
 export default function Team() {
   return (
     <div className='p-2'>
-      Team Page
+      <TeamTable />
     </div>
   )
 }

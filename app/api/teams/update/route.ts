@@ -25,8 +25,10 @@ export async function PATCH(req: Request) {
         name,
       }
     })
+    io?.emit("teams:update")
     return NextResponse.json({
-      message: "อัปเดตข้อมูลสำเร็จ"
+      message: "อัปเดตข้อมูลสำเร็จ",
+      success: true
     }, { status: 200 })
   } catch (err) {
     console.error("[updateTeam]", err)

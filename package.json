@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -k -n NEXT,SOCKET -c magenta,cyan \"next dev --turbopack\" \"tsx watch socketServer.ts\"",
+    "dev": "tsx server.ts",
     "build": "next build",
-    "start": "concurrently \"next start\" \"node dist/socketServer.js\"",
+    "start": "NODE_ENV=production tsx server.ts",
     "lint": "next lint"
   },
   "dependencies": {
@@ -49,7 +49,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "concurrently": "^9.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
     "prisma": "^6.11.1",

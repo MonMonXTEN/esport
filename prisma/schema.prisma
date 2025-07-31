@@ -32,7 +32,7 @@ model User {
 
 enum BracketType {
   SINGLE_ELIM
-  DOUBLE_ELIM
+  // DOUBLE_ELIM
 }
 
 enum TournamentStatus {
@@ -59,7 +59,7 @@ model Team {
 model Tournament {
   id              Int              @id @default(autoincrement())
   name            String
-  bracket         BracketType
+  bracket         BracketType      @default(SINGLE_ELIM)
   status          TournamentStatus @default(DRAFT)
   rounds          Int              @default(5) // รอบในการแข่งขัน 32>16>8>4>2 มี 5 รอบ
   matches         Match[]
@@ -74,7 +74,7 @@ model TournamentTeam {
   team         Team       @relation(fields: [teamId], references: [id])
   tournamentId Int
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  seed         Int?
+  seed         Int? // ตำแหน่งหลังจับคู่
 }
 
 model Match {

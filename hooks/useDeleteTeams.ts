@@ -1,5 +1,5 @@
 "use client"
-import deleteTeams from "@/lib/services/teamDelete"
+import deleteTeams from "@/lib/services/deleteTeams"
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
 

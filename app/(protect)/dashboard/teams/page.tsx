@@ -2,7 +2,7 @@ import TeamTable from "@/components/team/TeamTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Team",
+  title: "Teams",
 }
 
 export default function Team() {

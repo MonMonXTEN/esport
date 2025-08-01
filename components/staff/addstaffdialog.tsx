@@ -41,6 +41,7 @@ export default function AddStaffDialog({
     handleSubmit,
     formState: { errors },
     setValue,
+    setFocus,
     reset,
     watch,
   } = useForm<z.infer<typeof staffSchema>>({
@@ -73,8 +74,9 @@ export default function AddStaffDialog({
       toast.error("บันทึกไม่สำเร็จ ลองใหม่ภายหลัง")
     } finally {
       setLoading(false)
+      requestAnimationFrame(() => setFocus("username"))
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>

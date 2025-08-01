@@ -31,6 +31,7 @@ export default function AddTeamDialog({
     handleSubmit,
     formState: { errors },
     reset,
+    setFocus,
   } = useForm<z.infer<typeof teamSchema>>({
     resolver: zodResolver(teamSchema),
     defaultValues: { name: "", status: true },
@@ -54,8 +55,9 @@ export default function AddTeamDialog({
       toast.error((err as Error).message || "บันทึกไม่สำเร็จ กรุณาลองใหม่ในภายหลัง")
     } finally {
       setLoading(false)
+      requestAnimationFrame(() => setFocus("name"))
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -63,7 +65,7 @@ export default function AddTeamDialog({
         <DialogHeader>
           <DialogTitle>เพิ่มทีม</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <Label className="mb-3">ชื่อทีม</Label>

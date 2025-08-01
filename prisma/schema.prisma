@@ -38,7 +38,7 @@ enum BracketType {
 enum TournamentStatus {
   DRAFT
   LIVE
-  PENDING
+  FINISHED
 }
 
 enum MatchStatus {
@@ -62,6 +62,7 @@ model Tournament {
   bracket         BracketType      @default(SINGLE_ELIM)
   status          TournamentStatus @default(DRAFT)
   rounds          Int              @default(5) // รอบในการแข่งขัน 32>16>8>4>2 มี 5 รอบ
+  currentRound    Int?
   matches         Match[]
   tournamentTeams TournamentTeam[]
   createdAt       DateTime         @default(now())

@@ -26,13 +26,9 @@ model User {
   email     String?  @unique
   password  String
   role      Role     @default(staff)
+  matches   Match[]  @relation("referee")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-enum BracketType {
-  SINGLE_ELIM
-  // DOUBLE_ELIM
 }
 
 enum TournamentStatus {
@@ -46,55 +42,93 @@ enum MatchStatus {
   DONE
 }
 
+enum Round {
+  R32
+  R16
+  QF
+  SF
+  THIRD_PLACE
+  FINAL
+}
+
 model Team {
   id              Int              @id @default(autoincrement())
   name            String
   status          Boolean          @default(true) // เช็คมาหรือไม่มา
-  blueMatches     Match[]          @relation("blueTeamMatches")
-  redMatches      Match[]          @relation("redTeamMatches")
-  winnerMatches   Match[]          @relation("winnerMatches")
+  blueMatches     Match[]          @relation("blue")
+  redMatches      Match[]          @relation("red")
+  winnerMatches   Match[]          @relation("winner")
+  signatures      Signature[]
   tournamentTeams TournamentTeam[]
 }
 
 model Tournament {
-  id              Int              @id @default(autoincrement())
-  name            String
-  bracket         BracketType      @default(SINGLE_ELIM)
-  status          TournamentStatus @default(DRAFT)
-  rounds          Int              @default(5) // รอบในการแข่งขัน 32>16>8>4>2 มี 5 รอบ
-  currentRound    Int?
-  matches         Match[]
+  id     Int              @id @default(autoincrement())
+  name   String
+  status TournamentStatus @default(DRAFT)
+  active Boolean          @default(true)
+
   tournamentTeams TournamentTeam[]
+  matches         Match[]
   createdAt       DateTime         @default(now())
-  startedAt       DateTime?
+  updatedAt       DateTime         @updatedAt
 }
 
 model TournamentTeam {
-  id           Int        @id @default(autoincrement())
-  teamId       Int
-  team         Team       @relation(fields: [teamId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   tournamentId Int
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  seed         Int? // ตำแหน่งหลังจับคู่
+  team         Team       @relation(fields: [teamId], references: [id])
+  teamId       Int
+
+  @@id([tournamentId, teamId])
 }
 
 model Match {
-  id            Int         @id @default(autoincrement())
-  tournamentId  Int
-  tournament    Tournament  @relation(fields: [tournamentId], references: [id])
-  round         Int // รอบในการแข่งขัน 32>16>8>4>2 มี 5 รอบ
-  matchNo       Int // ลำดับในรอบ (1-32, 1-16, 1-8,..)
-  blueTeamId    Int
-  redTeamId     Int
-  blueTeam      Team?       @relation("blueTeamMatches", fields: [blueTeamId], references: [id])
-  redTeam       Team?       @relation("redTeamMatches", fields: [redTeamId], references: [id])
-  scoreBlue     Int         @default(0)
-  scoreRed      Int         @default(0)
-  bestOf        Int // 1 = BO1, 3 = BO3, 5 = BO5
-  signatureBlue String?     @db.LongText
-  signatureRed  String?     @db.LongText
-  signedAt      DateTime?
-  winnerId      Int?
-  winner        Team?       @relation("winnerMatches", fields: [winnerId], references: [id])
-  status        MatchStatus @default(PENDING)
+  id           Int         @id @default(autoincrement())
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentId Int
+  round        Round
+  sequence     Int // ลำดับช่องใน bracket
+  bestOf       Int // 1, 3, 5
+  status       MatchStatus @default(PENDING)
+  blueTeam     Team?       @relation("blue", fields: [blueTeamId], references: [id])
+  blueTeamId   Int?
+  redTeam      Team?       @relation("red", fields: [redTeamId], references: [id])
+  redTeamId    Int?
+  winnerTeam   Team?       @relation("winner", fields: [winnerTeamId], references: [id])
+  winnerTeamId Int?
+  blueScore    Int         @default(0)
+  redScore     Int         @default(0)
+
+  // self-relation ใช้อ้างอิงตัวเองเพื่อส่งไปยังแมตช์ต่อไป
+  parentMatch   Match?  @relation("children", fields: [parentMatchId], references: [id])
+  parentMatchId Int?
+  children      Match[] @relation("children")
+
+  // relation สำหรับทีมตกรอบ SF
+  thirdPlaceMatch   Match?  @relation("loserToThird", fields: [thirdPlaceMatchId], references: [id])
+  thirdPlaceMatchId Int?
+  losersFromSF      Match[] @relation("loserToThird")
+
+  referee    User?       @relation("referee", fields: [refereeId], references: [id])
+  refereeId  Int? // ผู้รับผิดชอบ
+  signatures Signature[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([tournamentId, round, sequence])
+}
+
+model Signature {
+  id      Int   @id @default(autoincrement())
+  match   Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  matchId Int
+
+  team   Team @relation(fields: [teamId], references: [id])
+  teamId Int
+
+  imageUrl String
+  createAt DateTime @default(now())
+
+  @@unique([matchId, teamId])
 }

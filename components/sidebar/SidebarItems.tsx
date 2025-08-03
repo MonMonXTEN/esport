@@ -2,6 +2,8 @@ import {
   Home,
   UserCog,
   Shield,
+  Dices,
+  Settings,
 } from "lucide-react"
 
 export const sidebarItems = [
@@ -11,13 +13,23 @@ export const sidebarItems = [
     icon: Home,
   },
   {
+    title: "แมตช์",
+    url: "/dashboard/matches",
+    icon: Dices,
+  },
+  {
     title: "รายชื่อทีม",
-    url: "/dashboard/team",
+    url: "/dashboard/teams",
     icon: Shield,
   },
   {
     title: "รายชื่อกรรมการ",
-    url: "/dashboard/staff",
+    url: "/dashboard/staffs",
     icon: UserCog,
+  },
+  {
+    title: "ทดสอบระบบ",
+    url: "/dashboard/test",
+    icon: Settings,
   },
 ]

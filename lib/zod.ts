@@ -20,3 +20,24 @@ export const teamSchema = z.object({
   name: z.string().min(1, "กรุณากรอกชื่อทีม"),
   status: z.boolean().optional(),
 })
+
+export const scoreSchema = z.object({
+  blueScore: z.number().int().min(0),
+  redScore: z.number().int().min(0),
+  signatures: z.array(
+    z.object({
+      teamId: z.number().int().positive(),
+      imageUrl: z.url(),
+    })
+  ).min(1).max(2),
+})
+
+export const querySchema = z.object({
+  round: z
+    .enum(["R32", "R16", "QF", "SF", "THIRD_PLACE", "FINAL"])
+    .optional(),
+  withSignatures: z
+    .enum(["true", "false"])
+    .optional()
+    .default("false"),
+})

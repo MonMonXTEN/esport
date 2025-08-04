@@ -40,7 +40,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       redTeam: true,
       winnerTeam: true,
       signatures: includeSign ? { include: { team: true } } : false,
-    }
+    },
   })
 
   matches.sort((a, b) => roundOrder[a.round] - roundOrder[b.round] || a.sequence - b.sequence)

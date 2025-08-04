@@ -19,19 +19,32 @@ export interface MatchWithTeams {
   status: "PENDING" | "DONE"
   blueTeam?: { id: number; name: string } | null
   redTeam?: { id: number; name: string } | null
+  blueScore?: number | null
+  redScore?: number | null
 }
 
 const ROUND_ORDER: Round[] = [
-  "R32", "R16", "QF", "SF", "THIRD_PLACE", "FINAL",
+  "R32", "R16", "QF", "SF", "FINAL", "THIRD_PLACE"
 ]
 const ROUND_LABEL: Record<Round, string> = {
   R32: "รอบ 32 ทีม",
   R16: "รอบ 16 ทีม",
   QF: "รอบ 8 ทีม",
   SF: "รอบรองชนะเลิศ",
-  THIRD_PLACE: "อันดับที่ 3",
   FINAL: "รอบชิงชนะเลิศ",
+  THIRD_PLACE: "อันดับที่ 3",
 }
+
+const COL: Record<Round, number> = {
+  R32: 1,
+  R16: 2,
+  QF: 3,
+  SF: 4,
+  FINAL: 5,
+  THIRD_PLACE: 5,
+}
+const columns = [...new Set(Object.values(COL))]
+
 
 export default function BracketView({
   tournamentId,
@@ -42,7 +55,6 @@ export default function BracketView({
 }) {
   const { matches, isLoading } = useMatches(tournamentId)
   const [openMatch, setOpenMatch] = useState<MatchWithTeams | null>(null)
-  
 
   const matchesByRound = useMemo(() => {
     const map: Record<Round, MatchWithTeams[]> = {
@@ -58,23 +70,25 @@ export default function BracketView({
 
   return (
     <>
-      <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(6,220px)" }}>
-        {ROUND_ORDER.map(round => (
-          <div key={round} className="space-y-4">
-            <h3 className="text-center text-sm font-semibold">{ROUND_LABEL[round]}</h3>
-            {matchesByRound[round].map(match => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                // ถ้าตอนนี้ยังไม่ LIVE ให้ onClick เป็น noop + toast
-                onClick={() => {
-                  if (tournamentStatus !== "LIVE") {
-                    toast.error("กรุณาเริ่มการแข่งขันก่อน");
-                    return;
-                  }
-                  setOpenMatch(match);
-                }}
-              />
+      <div
+        className="grid gap-4"
+        style={{ gridTemplateColumns: "repeat(5, 220px)" }}
+      >
+        {columns.map((col) => (
+          <div key={col} className="space-y-8">
+            {ROUND_ORDER.filter((r) => COL[r] === col).map((round) => (
+              <div
+                key={round}
+                className={round === "THIRD_PLACE" ? "mt-24" : ""}   // ⬅️ เลื่อนลง
+              >
+                <h3 className="mb-1 text-center text-sm font-semibold">
+                  {ROUND_LABEL[round]}
+                </h3>
+
+                {matchesByRound[round].map((m) => (
+                  <MatchCard key={m.id} match={m} onClick={() => ({})} />
+                ))}
+              </div>
             ))}
           </div>
         ))}
@@ -98,22 +112,39 @@ function MatchCard({
   match: MatchWithTeams
   onClick: () => void
 }) {
-  const done = match.status === "DONE"
+  const { blueTeam, redTeam, blueScore, redScore, status } = match
+  const done = status === "DONE"
+  const blueWin = done && (blueScore ?? 0) > (redScore ?? 0)
+  const redWin = done && (redScore ?? 0) > (blueScore ?? 0)
+
+  const row = (
+    name: string | undefined,
+    score: number | null | undefined,
+    isWinner: boolean,
+  ) => (
+    <div
+      className={cn(
+        "flex justify-between text-xs rounded px-2 py-1",
+        name ? "" : "italic text-muted-foreground",
+        isWinner && "font-bold",
+      )}
+    >
+      <span>{name ?? "TBD"}</span>
+      <span>{score ?? "-"}</span>
+    </div>
+  )
+
   return (
     <Card
       onClick={onClick}
       className={cn(
         "cursor-pointer transition hover:ring-2 hover:ring-primary",
-        done && "opacity-70"
+        done && "opacity-80",
       )}
     >
       <CardContent className="p-3 space-y-2">
-        <div className={cn("text-xs rounded px-2 py-1", match.blueTeam ? "" : "italic text-muted-foreground")}>
-          {match.blueTeam?.name ?? "TBD"}
-        </div>
-        <div className={cn("text-xs rounded px-2 py-1", match.redTeam ? "" : "italic text-muted-foreground")}>
-          {match.redTeam?.name ?? "TBD"}
-        </div>
+        {row(blueTeam?.name, blueScore, blueWin)}
+        {row(redTeam?.name, redScore, redWin)}
         <div className="flex justify-end">
           <Badge variant={done ? "secondary" : "outline"}>
             {done ? "DONE" : "PENDING"}

@@ -127,7 +127,7 @@ model Signature {
   team   Team @relation(fields: [teamId], references: [id])
   teamId Int
 
-  imageUrl String
+  imageUrl String?
   createAt DateTime @default(now())
 
   @@unique([matchId, teamId])

@@ -27,7 +27,7 @@ export const scoreSchema = z.object({
   signatures: z.array(
     z.object({
       teamId: z.number().int().positive(),
-      imageUrl: z.url(),
+      imageUrl: z.url().optional(),
     })
   ).min(1).max(2),
 })

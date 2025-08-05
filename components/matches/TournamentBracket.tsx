@@ -2,9 +2,7 @@ import useMatches from '@/hooks/useMatches';
 import { cn } from '@/lib/utils';
 import { Crown } from 'lucide-react';
 import { useMemo, useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react';
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch"
 import { toast } from 'sonner';
-import { Dialog, DialogContent } from '../ui/dialog';
 import ScoreDialog from './ScoreDialog';
 
 export type TournamentStatus = "DRAFT" | "LIVE" | "FINISHED"
@@ -15,6 +13,7 @@ export interface MatchWithTeams {
   sequence: number
   round: Round
   status: "PENDING" | "DONE"
+  bestOf: 1 | 3 | 5
   blueTeam?: { id: number; name: string } | null
   redTeam?: { id: number; name: string } | null
   blueScore?: number | null
@@ -208,7 +207,7 @@ return (
                       {/* FINAL: กึ่งกลางคอลัมน์ */}
                       <div
                         className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
-                        style={{ top: "45%" }}
+                        style={{ top: "47%" }}
                       >
                         <div
                           className="flex flex-col items-center"
@@ -343,11 +342,11 @@ return (
       </div>
 
       {openMatch && (
-        <Dialog open onOpenChange={() => setOpenMatch(null)}>
-          <DialogContent className="max-w-xl">
-            <ScoreDialog match={openMatch} />
-          </DialogContent>
-        </Dialog>
+        <ScoreDialog
+          open={!!openMatch}
+          match={openMatch}
+          onOpenChange={() => setOpenMatch(null)}
+        />
       )}
     </div>
 

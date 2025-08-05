@@ -1,57 +1,70 @@
-/* src/components/ScoreDialog.tsx */
 "use client"
 
-import { useRef, useState } from "react"
-import SignaturePad from "react-signature-canvas"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { MatchWithTeams } from "@/components/matches/BracketView"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
+import SignaturePadDialog from "./SignaturePadDialog"
 import { toast } from "sonner"
+import { TriangleAlert } from "lucide-react"
+import ScoreSection from "./ScoreSection"
+import { MatchWithTeams } from "./TournamentBracket"
 
-const schema = z.object({
-  blueScore: z.preprocess(Number, z.number().int().min(0)),
-  redScore:  z.preprocess(Number, z.number().int().min(0)),
-})
-type FormData = z.infer<typeof schema>
+export default function ScoreDialog({
+  open,
+  match,
+  onOpenChange
+}: {
+  open: boolean
+  match: MatchWithTeams
+  onOpenChange: () => void
+}) {
+  const [blueSign, setBlueSign] = useState<string | undefined>()
+  const [redSign, setRedSign] = useState<string | undefined>()
+  const [whichPad, setWhichPad] = useState<"blue" | "red" | null>(null)
+  const [blueScore, setBlueScore] = useState<number>(0)
+  const [redScore, setRedScore] = useState<number>(0)
 
-export default function ScoreDialog({ match }: { match: MatchWithTeams }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
-
-  const bluePad = useRef<SignaturePad>(null)
-  const redPad  = useRef<SignaturePad>(null)
   const [loading, setLoading] = useState(false)
 
-  const onSubmit = async (data: FormData) => {
-    const blueImg = bluePad.current?.getTrimmedCanvas().toDataURL("image/png")
-    const redImg  = redPad.current?.getTrimmedCanvas().toDataURL("image/png")
-    if (!blueImg || !redImg) {
-      toast.error("กรุณาเซ็นทั้งสองฝั่ง")
-      return
-    }
+  const isScoreValid = () => {
+    if (match.bestOf === 1) return blueScore !== redScore && (blueScore === 1 || redScore === 1)
+    if (match.bestOf === 3) return (blueScore === 2 || redScore === 2) && (blueScore + redScore <= 3)
+    if (match.bestOf === 5) return (blueScore === 3 || redScore === 3) && (blueScore + redScore <= 5)
+    return false
+  }
 
+  const onSubmit = async () => {
     try {
       setLoading(true)
       const res = await fetch(`/api/tournaments/matches/${match.id}/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          blueScore: data.blueScore,
-          redScore:  data.redScore,
+          blueScore,
+          redScore,
           signatures: [
-            { teamId: match.blueTeam?.id, imageUrl: blueImg },
-            { teamId: match.redTeam?.id, imageUrl: redImg },
+            { teamId: match.blueTeam?.id, imageUrl: blueSign },
+            { teamId: match.redTeam?.id, imageUrl: redSign },
           ],
         }),
       })
-      if (!res.ok) throw new Error(await res.text())
+      if (!res.ok) throw new Error((await res.json()).message)
       toast.success("บันทึกคะแนนสำเร็จ")
+      onOpenChange()
     } catch (err: unknown) {
       toast.error((err as Error).message || "บันทึกไม่สำเร็จ")
     } finally {
@@ -60,44 +73,80 @@ export default function ScoreDialog({ match }: { match: MatchWithTeams }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* ฝั่งน้ำเงิน */}
-      <section className="space-y-2">
-        <label className="text-sm font-medium block">
-          {match.blueTeam?.name ?? "Blue"}
-        </label>
-        <Input
-          type="number"
-          className="w-24"
-          {...register("blueScore")}
-          aria-invalid={!!errors.blueScore}
-        />
-        <SignaturePad
-          ref={bluePad}
-          canvasProps={{ className: "border w-full h-24 rounded" }}
-        />
-      </section>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl overflow-y-auto max-h-[calc(100vh-150px)]">
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="font-medium text-lg text-center">
+            ลงคะแนน
+          </DialogTitle>
+          <DialogDescription className="flex flex-col justify-center items-center gap-2 text-md font-bold text-black text-xl">
+            <div>{match.blueTeam?.name} <span className="text-gray-600 text-sm">VS</span> {match.redTeam?.name}</div>
+            <Badge variant="default" className="bg-blue-600 rounded-full">BO{match.bestOf}</Badge>
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={e => {
+          e.preventDefault()
+          if (!isScoreValid()) return toast.error("คะแนนไม่ถูกต้อง")
+          onSubmit()
+        }}
+          className="space-y-6">
 
-      {/* ฝั่งแดง */}
-      <section className="space-y-2">
-        <label className="text-sm font-medium block">
-          {match.redTeam?.name ?? "Red"}
-        </label>
-        <Input
-          type="number"
-          className="w-24"
-          {...register("redScore")}
-          aria-invalid={!!errors.redScore}
-        />
-        <SignaturePad
-          ref={redPad}
-          canvasProps={{ className: "border w-full h-24 rounded" }}
-        />
-      </section>
+          {/* Score Blue Team */}
+          <ScoreSection
+            teamName={match.blueTeam?.name}
+            teams="blue"
+            signImage={blueSign}
+            onClickSign={() => setWhichPad("blue")}
+            bestOf={match.bestOf}
+            score={blueScore}
+            setScore={match.bestOf === 1
+              ? () => { setBlueScore(1); setRedScore(0); }
+              : setBlueScore
+            }
+          />
 
-      <Button type="submit" disabled={loading} className="w-full">
-        {loading ? "กำลังบันทึก…" : "บันทึกคะแนน"}
-      </Button>
-    </form>
+          {/* Score Red Team */}
+          <ScoreSection
+            teamName={match.redTeam?.name}
+            teams="red"
+            signImage={redSign}
+            onClickSign={() => setWhichPad("red")}
+            bestOf={match.bestOf}
+            score={redScore}
+            setScore={match.bestOf === 1
+              ? () => { setBlueScore(0); setRedScore(1); }
+              : setRedScore
+            }
+          />
+
+          {match.status === "DONE" && (
+            <Alert variant="destructive">
+              <TriangleAlert />
+              <AlertTitle>คำเตือน</AlertTitle>
+              <AlertDescription>
+                การแข่งขันนี้มีการบันทึกคะแนนแล้ว และจะไม่สามารถบันทึกคะแนนได้อีก
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Button type="submit" disabled={loading || match.status !== "PENDING"} className={`w-full cursor-pointer`}>
+            {loading ? "กำลังบันทึก…" : "บันทึกคะแนน"}
+          </Button>
+        </form>
+        <SignaturePadDialog
+          open={whichPad === "blue"}
+          onClose={() => setWhichPad(null)}
+          onSave={img => setBlueSign(img)}
+        />
+        <SignaturePadDialog
+          open={whichPad === "red"}
+          onClose={() => setWhichPad(null)}
+          onSave={img => setRedSign(img)}
+        />
+        <DialogFooter className={cn("items-center sm:justify-center")}>
+          <p className="flex justify-center items-center gap-2 text-sm text-gray-500"><TriangleAlert size="14" />ไม่สามารถแก้ไขได้หากบันทึกคะแนนแล้ว</p>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

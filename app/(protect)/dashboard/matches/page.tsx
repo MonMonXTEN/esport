@@ -1,12 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import BracketView, { TournamentStatus } from "@/components/matches/BracketView"
 import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import ActionsButton from "@/components/matches/ActionsButton"
+import TournamentBracket, { TournamentStatus } from "@/components/matches/TournamentBracket"
 
 type APIRes = { id: number; name: string; status: TournamentStatus }
 
@@ -47,12 +47,12 @@ export default function TournamentPage() {
     )
 
   return (
-    <main className="space-y-6 p-4">
+    <main className="">
       <ActionsButton tournamentId={tour.id} />
-      <h1 className="text-xl font-semibold text-center">{tour.name}</h1>
       {/* ส่ง status ลงไป */}
-      <BracketView
+      <TournamentBracket
         tournamentId={tour.id}
+        title={tour.name}
         tournamentStatus={tour.status}
       />
     </main>

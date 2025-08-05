@@ -1,5 +1,4 @@
-
-import { MatchWithTeams } from "@/components/matches/BracketView"
+import { MatchWithTeams } from "@/components/matches/TournamentBracket"
 import { socket } from "@/lib/socketClient"
 import { useEffect } from "react"
 import useSWR from "swr"

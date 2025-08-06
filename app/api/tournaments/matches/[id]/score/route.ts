@@ -62,7 +62,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // validate score
   const maxGames = match.bestOf
   if (blueScore + redScore > maxGames) return NextResponse.json({ message: `กรุณากรอกคะแนนให้ถูกต้อง (BO${maxGames})` }, { status: 400 })
-  if (Math.max(blueScore, redScore) <= Math.floor(maxGames / 1)) return NextResponse.json({ message: "คะแนนไม่ถูกต้อง" }, { status: 400 })
+  if (Math.max(blueScore, redScore) <= Math.floor(maxGames / 2)) return NextResponse.json({ message: "คะแนนไม่ถูกต้อง" }, { status: 400 })
 
   const winnerTeamId = blueScore > redScore ? match.blueTeamId! : match.redTeamId!
   const loserTeamId = blueScore > redScore ? match.redTeamId! : match.blueTeamId!

@@ -60,7 +60,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
     "prisma": "^6.11.1",
-    "rm": "^0.1.8",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",

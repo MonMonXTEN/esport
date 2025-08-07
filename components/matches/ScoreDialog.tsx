@@ -99,6 +99,7 @@ export default function ScoreDialog({
             onClickSign={() => setWhichPad("blue")}
             bestOf={match.bestOf}
             score={blueScore}
+            otherScore={redScore}
             setScore={match.bestOf === 1
               ? () => { setBlueScore(1); setRedScore(0); }
               : setBlueScore
@@ -113,6 +114,7 @@ export default function ScoreDialog({
             onClickSign={() => setWhichPad("red")}
             bestOf={match.bestOf}
             score={redScore}
+            otherScore={blueScore}
             setScore={match.bestOf === 1
               ? () => { setBlueScore(0); setRedScore(1); }
               : setRedScore

@@ -11,11 +11,9 @@ export default function useMatches(tournamentId: number) {
   useEffect(() => {
     const handler = () => mutate()
     socket.on("match:update", handler)
-    socket.on("tournament:update", handler)
 
     return () => {
       socket.off("match:update", handler)
-      socket.off("tournament:update", handler)
     }
   }, [mutate])
   return { matches: data, error, isLoading, mutate }

@@ -5,7 +5,6 @@ import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import ActionsButton from "@/components/matches/ActionsButton"
 import TournamentBracket, { TournamentStatus } from "@/components/matches/TournamentBracket"
 
 type APIRes = { id: number; name: string; status: TournamentStatus }
@@ -48,13 +47,7 @@ export default function TournamentPage() {
 
   return (
     <main className="">
-      <ActionsButton tournamentId={tour.id} />
-      {/* ส่ง status ลงไป */}
-      <TournamentBracket
-        tournamentId={tour.id}
-        title={tour.name}
-        tournamentStatus={tour.status}
-      />
+      <TournamentBracket tournamentId={tour.id} />
     </main>
   )
 }

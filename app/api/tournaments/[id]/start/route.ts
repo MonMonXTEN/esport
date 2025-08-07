@@ -15,7 +15,7 @@ export async function POST(_req: Request, { params } : { params: Promise<{ id: s
     data: { status: "LIVE" },
   })
 
-  io?.emit("tournament:update", { tournamentId })
+  io?.emit("tournament:start")
   return NextResponse.json({ message: "เริ่มการแข่งขันแล้ว" }, { status: 200 })
 }
 
